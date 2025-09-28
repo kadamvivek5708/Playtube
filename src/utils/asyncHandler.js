@@ -6,16 +6,9 @@ const asyncHandler = (requestHandler) => {
         .catch((error)=> next(error))
 }}
 
+export {asyncHandler}
 
- export {asyncHandler}
-
-
-
-
-
-
-
-
+// __________ALTERNATE METHOD___________
 
 // const asyncHandler = (fn) => async (req,res,next) => {
 //     try {
