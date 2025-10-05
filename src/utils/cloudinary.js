@@ -68,7 +68,6 @@ const uploadOnCloudinary = async (localFilePath) => {
         //   api_key: '393326621978116'
         // }
 
-
         } catch (error) {
             // remove the locally stored temp file as upload operation got failed
             fs.unlinkSync(localFilePath)
@@ -76,4 +75,16 @@ const uploadOnCloudinary = async (localFilePath) => {
         }
 }
 
-export {uploadOnCloudinary}
+const deleteFromCloudinary = async(public_id) => {
+    try {
+        if (!public_id) return null;
+        const response = await cloudinary.uploader.destroy(public_id);
+        return response;
+    } catch (error) {
+        throw null;
+    }
+}
+
+export {uploadOnCloudinary,
+        deleteFromCloudinary
+}
