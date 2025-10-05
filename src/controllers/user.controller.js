@@ -4,6 +4,7 @@ import { User } from "../models/users.model.js"
 import {deleteFromCloudinary, uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 const generateAccessAndRefreshTokens = async(userId) =>{
     try {
@@ -403,13 +404,65 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
         //     avatar: 'http://res.cloudinary.com/ddsj4bt3u/image/upload/v1759062480/rzfjmtoemxb5rvpwzl4w.jpg',
         //     subscribersCount: 0,
         //     channelsSubscribedTo: 0,
-        //     isSubscribed: false
+        //     isSubscribed: false  
         // }
 
     return res
         .status(200)
         .json(
             new ApiResponse(200,channel[0],"User data fetched succesfully")
+        )
+})
+
+const getUserWatchHistory = asyncHandler(async(req, res) =>{
+    const user = User.aggregate([
+        {
+            $match:{
+                _id: new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup:{
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as : "watchHistory",
+                pipeline:[
+                    {
+                        $lookup:{
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as : "owner",
+                            pipeline:[
+                                {
+                                    $project:{
+                                        username:1,
+                                        fullname:1,
+                                        avatar:1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields:{
+                            owner:{
+                                $first : "$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ])
+
+    return res     
+        .status(200)
+        .json(
+            200,
+            user[0].watchHistory,
+            "Watch history fetched succesfully"
         )
 })
 
@@ -423,4 +476,5 @@ export  {   registerUser,
             updateUserAvatar,
             updateUserCoverImage,
             getUserChannelProfile,
+            getUserWatchHistory,
         }
