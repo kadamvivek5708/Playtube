@@ -65,7 +65,7 @@ const registerUser = asyncHandler( async (req,res) => {
     // create user object - create entry in db
     const user = await User.create({
         fullName,
-        avatar : avatar.url,
+        avatar : avatar?.url,
         coverImage : coverImage?.url || "",
         email,
         password,
@@ -268,6 +268,7 @@ const updateUserAvatar = asyncHandler(async(req, res) =>{
         throw new ApiError(400,"Avatar required")
     }
     const oldUser = await User.findById(req.user?._id)
+    // UPDATE THIS IT IS WRONG
     const oldPublicId = oldUser?.avatar?.public_id;
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
