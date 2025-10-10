@@ -11,6 +11,14 @@ const VideoSchema = new Schema({
         type:String,
         required:true
     },
+    videoPublicId:{
+        type:String,
+        required:true
+    },
+    thumbnailPublicId:{
+        type:String,
+        required:true
+    },
     title:{
         type:String,
         required:true

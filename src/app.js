@@ -20,4 +20,7 @@ import userRouter from "./routes/user.routes.js";
 app.use("/api/v1/users",userRouter)
 // https://localhost:3000/api/v1/users/register  <--- url will be generated like this
 
+import videoRouter from "./routes/video.routes.js"
+app.use("/api/v1/video",videoRouter)
+
 export {app} 
