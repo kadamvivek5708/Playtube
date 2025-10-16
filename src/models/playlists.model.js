@@ -1,5 +1,7 @@
-import mongoose from "mongoose"; 
-import { Schema } from "mongoose";
+import mongoose,{ Schema } from "mongoose"; 
+
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
 
 const PlaylistSchema = new Schema({
     name:{
@@ -9,10 +11,12 @@ const PlaylistSchema = new Schema({
     description:{
         type: String
     },
-    videos:{
-        type: Schema.Types.ObjectId,
-        ref: "Video"
-    },
+    videos:[
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Video"
+        }
+    ],
     owner:{
         type: Schema.Types.ObjectId,
         ref: "User"

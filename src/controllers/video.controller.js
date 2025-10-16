@@ -87,6 +87,75 @@ const uploadVideo = asyncHandler(async(req, res) => {
     }
 })
 
+const getVideoById = asyncHandler(async(req, res) => {
+    // console.log(req)
+    const {videoId} = req.params
+    const video = await Video.findById(videoId)
+    if(!video) throw new ApiError(404,"Video not found")
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, video, "Video Fetched Successfully"))
+})
+
+const updateVideo = asyncHandler(async(req,res) => {
+    const {videoId} = req.params
+
+    // 1.check if user is owner
+    const video = await Video.findOne({
+        _id:videoId,
+        owner:req.user?._id
+    })
+    if(!video) throw new ApiError(404,"Video not found or you don't have permissions")
+
+    // 2.take fields to update
+    const newThumbnail = req.file?.path
+    const {title, description} = req.body
+
+    let uploadedThumbnail = null;
+    try {
+        // 3.if thumbnail is present upload it on cloudinary
+        if(newThumbnail){
+            uploadedThumbnail = await uploadOnCloudinary(newThumbnail)
+            if (!uploadedThumbnail) {
+                throw new ApiError(500,"Error while uploading on cloudinary")
+            }       
+        }
+    
+        // 4.update db 
+        const fieldsToUpdate = {};
+        if (title !== undefined) fieldsToUpdate.title = title;
+        if (description !== undefined) fieldsToUpdate.description = description;
+        if (uploadedThumbnail) {
+            fieldsToUpdate.thumbnail = uploadedThumbnail?.url
+            fieldsToUpdate.thumbnailPublicId = uploadedThumbnail?.public_id
+        }
+    
+        const updatedFields = await Video.findByIdAndUpdate(
+            videoId,
+            {
+                $set: fieldsToUpdate
+            },
+            { new: true }
+        )
+        if(!updatedFields) throw new ApiError(500,"Something went wrong while updating DB")
+    
+        // 5.If thumbnail is updated then delete old from cloudinary
+        if(newThumbnail && video?.thumbnailPublicId) await deleteFromCloudinary(video?.thumbnailPublicId,"image");
+    
+        // 6.response
+        return res
+            .status(200)
+            .json(new ApiResponse(200, updatedFields, "Fields updated succesfully !!!"))
+    
+    } catch (error) {
+        if (uploadedThumbnail?.public_id) {
+            await deleteFromCloudinary(uploadedThumbnail.public_id, "image");
+        }
+        throw error;
+    }
+})
+
 const deleteVideo = asyncHandler(async(req, res) => {
     
     const {videoId} = req.params
@@ -111,100 +180,19 @@ const deleteVideo = asyncHandler(async(req, res) => {
         .json(new ApiResponse(200,{},"Video deleted Succesfully"))
 })
 
-const viewVideo = asyncHandler(async(req, res) => {
-    // console.log(req)
-    const {videoId} = req.params
-    const video = await Video.findById(videoId)
-    if(!video) throw new ApiError(404,"Video not found")
-
-    return res
-        .status(200)
-        .json(new ApiResponse(200, video, "Video Fetched Successfully"))
+const getAllVideos = asyncHandler(async(req,res)=> {
+    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    //TODO: get all videos based on query, sort, pagination
 })
 
-const editThumbnail = asyncHandler(async(req, res) => {
-
-    // 1.check if user is owner
+const tooglePublishStatus = asyncHandler(async(req,res) => {
     const {videoId} = req.params
-    const video = await Video.findOne({
-        _id:videoId,
-        owner:req.user?._id
-    })
-    if(!video) throw new ApiError(404,"Video not found or you Don't have permission")
-
-    // 2.take thumbnail 
-    const newThumbnail = req.file?.path
-    if (!newThumbnail) {
-            throw new ApiError(400,"Thumbnail Image is required")
-        }
-
-    // 3.upload thumbnail on cloudinary
-    const uploaded = await uploadOnCloudinary(newThumbnail)
-    if (!uploaded) {
-        throw new ApiError(500,"Error while uploading on cloudinary")
-    }
-
-    // 4.update db thumbnail url and public id
-    const updatedvideo = await Video.findByIdAndUpdate(
-            videoId,
-            {
-                $set:{
-                    thumbnail:uploaded?.url,
-                    thumbnailPublicId : uploaded?.public_id
-                }
-            },
-            {
-                new:true
-            }
-    )
-    if(!updatedvideo) throw new ApiError(500,"Error while updating DB")
-
-    // 4.delete old thumbnail from cloudinary
-    if(video?.thumbnailPublicId) await deleteFromCloudinary(video?.thumbnailPublicId,"image");
-
-    // 6.response
-    return res
-        .status(200)
-        .json( new ApiResponse(200,updatedvideo,"Thumbnail Edited"))
-})
-
-const editFields = asyncHandler(async(req, res)=> {
- 
-    const {videoId} = req.params
-    const video = await Video.findOne({
-        _id:videoId,
-        owner:req.user?._id
-    })
-    if(!video) throw new ApiError(404,"Video not found ")
-
-    // take fields to update
-    const {title, description, duration, isPublished} = req.body;
-
-    const fieldsToUpdate = {};
-    if (title !== undefined) fieldsToUpdate.title = title;
-    if (description !== undefined) fieldsToUpdate.description = description;
-    if (duration !== undefined) fieldsToUpdate.duration = duration;
-    if (isPublished !== undefined) fieldsToUpdate.isPublished = isPublished; 
-
-
-    const updatedFields = await Video.findByIdAndUpdate(
-        videoId,
-        {
-            $set: fieldsToUpdate
-        },
-        { new: true }
-    )
-    if(!updatedFields) throw new ApiError(500,"Something went wrong while updating DB")
-
-    return res
-            .status(200)
-            .json(new ApiResponse(200, updatedFields, "Field updated succesfully !!!"))
-
 })
 
 export {uploadVideo,
         deleteVideo,
-        viewVideo,
-        editThumbnail,
-        editFields
+        getVideoById,
+        updateVideo,
+        getAllVideos,
+        tooglePublishStatus
     }   
