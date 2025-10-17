@@ -4,6 +4,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 
+import pagination from "pagination"
+
 
 const uploadVideo = asyncHandler(async(req, res) => {
     let videoPublicId
@@ -32,26 +34,23 @@ const uploadVideo = asyncHandler(async(req, res) => {
         }
 
         // 3.take title, description from user
-        const {title, description, duration, isPublished} = req.body
+        const {title, description} = req.body
 
         if([title,description].some((field) => field?.trim() === "")) {
             throw new ApiError(400,"All fields are required")
         } 
-        if(!duration || duration === 0){
-            throw new ApiError(400,"Video duration is required")
-        }
+        
 
         // 4.create db object
         const video = await Video.create({
             title,
             description,
-            duration,
             owner:req.user?._id,
-            isPublished,
             thumbnail:thumbnail?.url,
             videoFile:videoFile?.url,
+            duration:videoFile?.duration,
             videoPublicId,
-            thumbnailPublicId
+            thumbnailPublicId,
         })
 
         // 5.check for db object creation
@@ -180,13 +179,40 @@ const deleteVideo = asyncHandler(async(req, res) => {
         .json(new ApiResponse(200,{},"Video deleted Succesfully"))
 })
 
+const getAllPublicVideos = asyncHandler(async(req,res) => {
+    // 1.take userId to find all videos of that particular user
+    const {userId} = req.params
+
+    // 2.compare this id with the owner in Video db
+    const publicVideos = await Video.find(
+        {
+            isPublished:true,
+            owner:userId
+        })
+
+    return res  
+            .status(200)
+            .json(new ApiResponse(200,publicVideos,"Okkkk"))
+})
+
 const getAllVideos = asyncHandler(async(req,res)=> {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+
+
 })
 
 const tooglePublishStatus = asyncHandler(async(req,res) => {
     const {videoId} = req.params
+    const updatedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        [
+            {$set:{isPublished : {$not:"$isPublished"}}}
+        ]
+    )
+    return res  
+        .status(200)
+        .json(new ApiResponse(200,updatedVideo,"Toogle Status"))
 })
 
 export {uploadVideo,
@@ -194,5 +220,6 @@ export {uploadVideo,
         getVideoById,
         updateVideo,
         getAllVideos,
-        tooglePublishStatus
+        tooglePublishStatus,
+        getAllPublicVideos
     }   

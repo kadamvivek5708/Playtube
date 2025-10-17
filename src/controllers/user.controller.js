@@ -415,16 +415,6 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
         throw new ApiError(404,"Channel Does not exists")
     }
     // console.log(channel)
-        // {
-        //     _id: new ObjectId('68d929d483308fff692072c5'),
-        //     username: 'vivek5708',
-        //     email: 'kadam22@gmail.com',
-        //     fullName: 'Vivek Kadam',
-        //     avatar: 'http://res.cloudinary.com/ddsj4bt3u/image/upload/v1759062480/rzfjmtoemxb5rvpwzl4w.jpg',
-        //     subscribersCount: 0,
-        //     channelsSubscribedTo: 0,
-        //     isSubscribed: false  
-        // }
 
     return res
         .status(200)

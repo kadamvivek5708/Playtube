@@ -1,10 +1,11 @@
 import { Router } from "express";
 
 import {    deleteVideo, 
-            editFields, 
-            editThumbnail, 
+            updateVideo, 
+            tooglePublishStatus, 
             uploadVideo, 
-            viewVideo 
+            getVideoById, 
+            getAllPublicVideos
         } from "../controllers/video.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -24,13 +25,15 @@ router.route("/upload-video").post(verifyJWT, upload.fields([
 ]), uploadVideo)
 
 router.route("/videos/:videoId").delete(verifyJWT,deleteVideo)
-router.route("/view/:videoId").get(verifyJWT,viewVideo)
-router.route("/edit-thumbnail/:videoId").post(
+router.route("/view/:videoId").get(verifyJWT,getVideoById)
+router.route("/edit-video/:videoId").patch(
     verifyJWT,
     upload.single("thumbnail"),
-    editThumbnail
+    updateVideo
 )
-router.route("/edit-fields/:videoId").patch(verifyJWT,editFields)
+
+router.route("/toogle-publish-status/:videoId").put(verifyJWT,tooglePublishStatus)
+router.route("/getAllPublicVideos/:userId").get(verifyJWT,getAllPublicVideos)
 
 
 export default router
