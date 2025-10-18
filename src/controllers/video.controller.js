@@ -3,9 +3,7 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
-
-import pagination from "pagination"
-
+import mongoose from "mongoose";
 
 const uploadVideo = asyncHandler(async(req, res) => {
     let videoPublicId
@@ -196,10 +194,36 @@ const getAllPublicVideos = asyncHandler(async(req,res) => {
 })
 
 const getAllVideos = asyncHandler(async(req,res)=> {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+    const { page = 1, limit = 10, isPublished, sortBy, sortType, userId } = req.query
+    const isPublishedBool = isPublished === 'true';
+    const sorting = sortType === "asc" ? 1 : -1;
+    const ownerId = new mongoose.Types.ObjectId(userId);
 
+    const options = {
+        page,
+        limit,
+    };
+    
+    const pipeline = [
+        {
+            $match:{
+                owner:ownerId,
+                isPublished:isPublishedBool,
+            }
+        },
+        {
+            $sort:{
+                [sortBy]: sorting
+            }
+        }
+    ];  
 
+    const videos = await Video.aggregatePaginate(pipeline,options);
+
+    return res  
+            .status(200)
+            .json(new ApiResponse(200,videos,"Videos Fetched Succesfuly"))
 })
 
 const tooglePublishStatus = asyncHandler(async(req,res) => {
@@ -221,5 +245,5 @@ export {uploadVideo,
         updateVideo,
         getAllVideos,
         tooglePublishStatus,
-        getAllPublicVideos
+        getAllPublicVideos,
     }   

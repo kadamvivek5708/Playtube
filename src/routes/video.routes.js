@@ -1,11 +1,12 @@
 import { Router } from "express";
 
-import {    deleteVideo, 
-            updateVideo, 
-            tooglePublishStatus, 
-            uploadVideo, 
-            getVideoById, 
-            getAllPublicVideos
+import {    uploadVideo,
+            deleteVideo,
+            getVideoById,
+            updateVideo,
+            getAllVideos,
+            tooglePublishStatus,
+            getAllPublicVideos,
         } from "../controllers/video.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -23,17 +24,16 @@ router.route("/upload-video").post(verifyJWT, upload.fields([
         maxCount:1
     }
 ]), uploadVideo)
-
-router.route("/videos/:videoId").delete(verifyJWT,deleteVideo)
-router.route("/view/:videoId").get(verifyJWT,getVideoById)
-router.route("/edit-video/:videoId").patch(
+router.route("/delete-video/:videoId").delete(verifyJWT,deleteVideo)
+router.route("/get-video/:videoId").get(verifyJWT,getVideoById)
+router.route("/update-video/:videoId").patch(
     verifyJWT,
     upload.single("thumbnail"),
     updateVideo
 )
-
-router.route("/toogle-publish-status/:videoId").put(verifyJWT,tooglePublishStatus)
-router.route("/getAllPublicVideos/:userId").get(verifyJWT,getAllPublicVideos)
+router.route("/get-all-videos").get(verifyJWT, getAllVideos)
+router.route("/toogle-publish-status/:videoId").put(verifyJWT, tooglePublishStatus)
+router.route("/get-all-public-videos/:userId").get(verifyJWT, getAllPublicVideos)
 
 
 export default router
