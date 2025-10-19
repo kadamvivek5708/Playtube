@@ -1,4 +1,4 @@
-import mongoose,{isValidObjectId} from "mongoose";
+import {isValidObjectId} from "mongoose";
 import { Tweets } from "../models/tweets.model.js";
 import {asyncHandler} from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/apiError.js";
@@ -59,12 +59,19 @@ const updateTweet = asyncHandler(async(req, res) => {
 
 const deleteTweet = asyncHandler(async(req, res) => {
     const {tweetId} = req.params
+    const userId = req.user?._id
+
     if(!isValidObjectId(tweetId)){
         throw new ApiError(400,"Please give a valid tweet Id")
     }
-    const deletedTweet = await Tweets.findByIdAndDelete(tweetId)
+    const deletedTweet = await Tweets.findOneAndDelete(
+        {
+            _id:tweetId,
+            owner:userId,
+        }
+    )
     if(!deletedTweet){
-        throw new ApiError(404,"Tweet not found")
+        throw new ApiError(404,"Tweet not found or you dont have permissions")
     }
 
     return res
@@ -77,7 +84,10 @@ const getUserTweets = asyncHandler(async(req, res) => {
     if(!isValidObjectId(tweetId)){
         throw new ApiError(400,"Please give a valid tweet Id")
     }
-    const tweet = await Tweets.findById(tweetId)
+    const tweet = await Tweets.findById(tweetId).populate(
+        "owner",
+        "username avatar"
+    );
     if(!tweet){
         throw new ApiError(404,"Tweet Not Found")
     }
