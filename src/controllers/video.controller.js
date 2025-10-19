@@ -194,32 +194,68 @@ const getAllPublicVideos = asyncHandler(async(req,res) => {
 })
 
 const getAllVideos = asyncHandler(async(req,res)=> {
-    //TODO: get all videos based on query, sort, pagination
     const { page = 1, limit = 10, isPublished, sortBy, sortType, userId } = req.query
     const isPublishedBool = isPublished === 'true';
     const sorting = sortType === "asc" ? 1 : -1;
-    const ownerId = new mongoose.Types.ObjectId(userId);
 
     const options = {
-        page,
-        limit,
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
     };
     
-    const pipeline = [
+    const aggregationPipeline = Video.aggregate([
         {
             $match:{
-                owner:ownerId,
+                owner:new mongoose.Types.ObjectId(userId),
                 isPublished:isPublishedBool,
             }
         },
         {
-            $sort:{
-                [sortBy]: sorting
+            $lookup:{
+                from:"users",
+                localField: "owner",
+                foreignField: "_id",
+                as:"ownerDetails",
+                pipeline:[{
+                    $project:{
+                        username:1,
+                        avatar:1
+                    }
+                }]
             }
-        }
-    ];  
-
-    const videos = await Video.aggregatePaginate(pipeline,options);
+        },
+        {
+            $addFields: {
+                owner: { $first: "$ownerDetails" }
+            }
+        },
+        {
+            $project:{
+                _id: 1,
+                title: 1,
+                thumbnail: 1, 
+                videoFile: 1, 
+                duration: 1,
+                views: 1,
+                createdAt: 1,
+                owner: 1
+            }
+        },
+        {
+            $sort:{
+                [sortBy || "createdAt"]: sorting
+            }
+        },
+    ]);  
+    // console.log(aggregationPipeline)
+    
+    const videos = await Video.aggregatePaginate(aggregationPipeline,options);
+    // console.log(videos)
+    if (!videos || videos.docs.length === 0) {
+        return res
+            .status(200)
+            .json(new ApiResponse(200, [], "No videos found"));
+    }
 
     return res  
             .status(200)
