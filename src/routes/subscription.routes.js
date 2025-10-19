@@ -10,7 +10,7 @@ const router = Router();
 
 router.route("/toggle-subscription/:channelId").post(verifyJWT,toggleSubscription)
 router.route("/get-user-channel-subscribers/:channelId").get(verifyJWT,getUserChannelSubscribers)
-router.route("/get-subscribed-channel").get(verifyJWT,getSubscribedChannels)
+router.route("/get-subscribed-channel/:userId").get(verifyJWT,getSubscribedChannels)
 
 
 export default router
