@@ -15,10 +15,13 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 
+// https://localhost:3000/api/v1/users/register  <--- url will be generated like this
 // router routes
+import healthcheckRouter from "./routes/healthcheck.routes.js"
+app.use("/api/v1/", healthcheckRouter)
+
 import userRouter from "./routes/user.routes.js";
 app.use("/api/v1/users",userRouter)
-// https://localhost:3000/api/v1/users/register  <--- url will be generated like this
 
 import videoRouter from "./routes/video.routes.js"
 app.use("/api/v1/video",videoRouter)
@@ -37,4 +40,8 @@ app.use("/api/v1/likes", likeRouter)
 
 import playlistRouter from "./routes/playlists.routes.js"
 app.use("/api/v1/playlists", playlistRouter)
+
+import dashboardRouter from "./routes/dashboard.routes.js"
+app.use("/api/v1/dashboard", dashboardRouter)
+
 export {app} 

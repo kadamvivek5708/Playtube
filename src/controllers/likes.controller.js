@@ -128,4 +128,3 @@ export {
     getLikedVideos
 }
 
-// Avoid repetation and use a function to like just seperate the video,comment,tweet
