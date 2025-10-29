@@ -42,7 +42,7 @@ const UserSchema = new Schema({
             ref:"Video"
         }
     ],
-    refreshTokens:{
+    refreshToken:{
         type:String,
     }
 },{timestamps:true})
