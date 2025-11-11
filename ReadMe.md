@@ -103,7 +103,7 @@ The project follows a modular structure to keep the codebase organized and maint
 
 For a visual representation of the data models and their relationships, please refer to the Eraser diagram:
 
-[**View Data Models on Eraser**]([https://app.eraser.io/workspace/3rfRXykWZi2RW166kh0g?origin=share&elements=UMBxkEiBrYRm5yHj3yTkcA](https://app.eraser.io/workspace/3rfRXykWZi2RW166kh0g?origin=share&elements=UMBxkEiBrYRm5yHj3yTkcA))
+[**View Data Models on Eraser**](https://app.eraser.io/workspace/3rfRXykWZi2RW166kh0g?origin=share&elements=UMBxkEiBrYRm5yHj3yTkcA)
 
 -----
 
