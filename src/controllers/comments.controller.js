@@ -19,7 +19,7 @@ const addComment = asyncHandler(async(req,res) => {
 
     // create db instance
     const Comment = await Comments.create({
-        videos: videoId,
+        video: videoId,
         owner: userId,
         content
     })
@@ -46,7 +46,7 @@ const updateComment = asyncHandler(async(req,res) => {
 
     const updatedComment = await Comments.findOneAndUpdate(
         {
-            videos:videoId,
+            video:videoId,
             owner:userId,
             _id:commentId
         },
@@ -102,7 +102,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const aggregationPipeline = Comments.aggregate([
         {
             $match:{
-                videos:new mongoose.Types.ObjectId(videoId)
+                video:new mongoose.Types.ObjectId(videoId)
             }
         },
         {

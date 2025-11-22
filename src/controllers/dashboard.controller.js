@@ -81,7 +81,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     // Get all the videos uploaded by the channel
     const {channelId} = req.params
     if(!isValidObjectId(channelId)){
-        new ApiError(401,"please give valid channel id")
+      throw new ApiError(400,"please give valid channel id")
     }
 
     // 2.compare this id with the owner in Video db

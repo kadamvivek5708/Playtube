@@ -34,7 +34,7 @@ const uploadVideo = asyncHandler(async(req, res) => {
         // 3.take title, description from user
         const {title, description} = req.body
 
-        if([title,description].some((field) => field?.trim() === "")) {
+        if([title,description].some((field) => !field || field?.trim() === "")) {
             throw new ApiError(400,"All fields are required")
         } 
         

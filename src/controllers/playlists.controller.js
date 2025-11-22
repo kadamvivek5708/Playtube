@@ -8,7 +8,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 const createPlaylist = asyncHandler(async (req, res) => {
     const {name, description} = req.body
     const userId = req.user?._id
-    if(!name.trim()){
+    if(!name.trim() || !name){
         throw new ApiError(401, "valid name required")
     }
 
