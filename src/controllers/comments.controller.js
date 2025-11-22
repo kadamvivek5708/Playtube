@@ -3,7 +3,7 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Comments } from "../models/comments.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-
+import { toxicityDetection } from "../utils/toxicityHandler.js";
 
 const addComment = asyncHandler(async(req,res) => { 
     // need userId, videoId, content
@@ -12,10 +12,12 @@ const addComment = asyncHandler(async(req,res) => {
     const userId = req.user?._id
 
     // check all validaton 
-    // TODO : here you also need to check if content contains only spaces for all others.
     if(!isValidObjectId(videoId) || !content?.trim()){
         throw new ApiError(400, "Please give a valid VideoId and content")
     }
+
+    // AI MODERATION (HUGGING FACE ALTERNATIVE)
+    await toxicityDetection(content)
 
     // create db instance
     const Comment = await Comments.create({

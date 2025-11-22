@@ -3,6 +3,7 @@ import { Tweets } from "../models/tweets.model.js";
 import {asyncHandler} from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/apiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js"
+import { toxicityDetection } from "../utils/toxicityHandler.js";
 
 const createTweet = asyncHandler(async(req, res) => {
     // 1.get user id and content to create a tweet with owner
@@ -11,7 +12,9 @@ const createTweet = asyncHandler(async(req, res) => {
     if(!content){
         throw new ApiError(400,"content required")
     }
-    // console.log(userId,"   ", content)
+
+    // Toxic content detection
+    await toxicityDetection(content)
 
     // 2.create a db collection for storing tweets and add this tweet to it
     const tweet = await Tweets.create({
